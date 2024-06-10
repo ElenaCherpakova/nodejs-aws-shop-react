@@ -17,6 +17,7 @@ export class CdkDeploymentStack extends cdk.Stack {
       bucketName: 'elena-my-shop-s3',
       websiteIndexDocument: 'index.html',
       publicReadAccess: false,
+      autoDeleteObjects: true,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
