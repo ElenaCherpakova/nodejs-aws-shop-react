@@ -57,5 +57,10 @@ export class CdkDeploymentStack extends cdk.Stack {
       value: distribution.distributionDomainName,
       description: 'URL of the CloudFront distribution',
     });
+
+    new cdk.CfnOutput(this, 'MyBucketURL', {
+      value: siteBucket.bucketWebsiteUrl,
+      description: 'URL of the s3 bucket',
+    })
   }
 }
