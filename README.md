@@ -1,7 +1,7 @@
 # React-shop-cloudfront
 
 - [S3 Bucket Link](https://elena-my-shop-s3.s3.ca-central-1.amazonaws.com/index.html)
-- [Cloudfront Link](https://drtovmliszumi.cloudfront.net/)
+- [Cloudfront Link](https://dwkjaoz94t9wv.cloudfront.net/)
 
 This is frontend starter project for nodejs-aws mentoring program. It uses the following technologies:
 
