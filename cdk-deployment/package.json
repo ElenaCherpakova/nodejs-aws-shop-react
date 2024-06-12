@@ -8,9 +8,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk-deploy": "cdk deploy",
-    "deploy": "npm run build && npm run cdk-deploy",
-    "cdk-destroy": "cdk destroy"
+    "cdk": "cdk"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
