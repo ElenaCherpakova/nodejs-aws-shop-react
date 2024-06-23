@@ -50,6 +50,7 @@ export function useUpsertAvailableProduct() {
   return useMutation((values: AvailableProduct) =>
     axios.put<AvailableProduct>(`${API_PATHS.bff}/product`, values, {
       headers: {
+        // "Content-Type": "application/json",
         Authorization: `Basic ${localStorage.getItem("authorization_token")}`,
       },
     })
