@@ -25,7 +25,20 @@ const AppWrapper: React.FC = () => {
   const setAlert = useAlert();
 
   useEffect(() => {
-    const interceptor = axios.interceptors.response.use(
+    const requestInterceptor = axios.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem("authorization_token");
+        if (token && config.headers) {
+          config.headers.Authorization = `Basic ${token}`;
+        }
+        return config;
+      },
+      (error) => {
+        console.log("Interceptor caught an error:", (error as Error).message);
+        return Promise.reject(error);
+      }
+    );
+    const responseInterceptor = axios.interceptors.response.use(
       (response) => response,
       (error) => {
         console.log("Interceptor caught an error:", (error as Error).message);
@@ -52,7 +65,8 @@ const AppWrapper: React.FC = () => {
     );
 
     return () => {
-      axios.interceptors.response.eject(interceptor);
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
     };
   }, [setAlert]);
 

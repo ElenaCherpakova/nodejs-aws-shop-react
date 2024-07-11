@@ -40,9 +40,6 @@ export default function CSVFileImport({ url, title }: CSVFileImportProps) {
     if (file) {
       try {
         const { data } = await axios.get(url, {
-          headers: {
-            Authorization: `Basic ${authorization}`,
-          },
           params: {
             name: encodeURIComponent(file.name),
           },
