@@ -29,15 +29,15 @@ export default function CSVFileImport({ url, title }: CSVFileImportProps) {
   };
 
   const uploadFile = async () => {
+    const authorization = localStorage.getItem("authorization_token");
+    if (!authorization) {
+      return setAlert({
+        type: "error",
+        text: "Unauthorized: Please check your credentials.",
+      });
+    }
     // Get the presigned URL
     if (file) {
-      const authorization = localStorage.getItem("authorization_token");
-      if (!authorization) {
-        return setAlert({
-          type: "error",
-          text: "Unauthorized: Please check your credentials.",
-        });
-      }
       try {
         const { data } = await axios.get(url, {
           headers: {
