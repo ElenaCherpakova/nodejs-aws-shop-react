@@ -1,6 +1,8 @@
 import React from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import axios from "axios";
+import { useAlert } from "~/components/AlertContext";
 
 type CSVFileImportProps = {
   url: string;
@@ -8,39 +10,52 @@ type CSVFileImportProps = {
 };
 
 export default function CSVFileImport({ url, title }: CSVFileImportProps) {
-  const [file, setFile] = React.useState<File>();
+  const [file, setFile] = React.useState<File | "">();
+
+  const setAlert = useAlert();
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
       setFile(file);
+      setAlert(null);
     }
   };
 
   const removeFile = () => {
     setFile(undefined);
+    setAlert(null);
   };
 
   const uploadFile = async () => {
-    console.log("uploadFile to", url);
-
     // Get the presigned URL
-    // const response = await axios({
-    //   method: "GET",
-    //   url,
-    //   params: {
-    //     name: encodeURIComponent(file.name),
-    //   },
-    // });
-    // console.log("File to upload: ", file.name);
-    // console.log("Uploading to: ", response.data);
-    // const result = await fetch(response.data, {
-    //   method: "PUT",
-    //   body: file,
-    // });
-    // console.log("Result: ", result);
-    // setFile("");
+    if (file) {
+      try {
+        const { data } = await axios.get(url, {
+          params: {
+            name: encodeURIComponent(file.name),
+          },
+        });
+
+        const preSignedUrl = data.url;
+        const result = await fetch(preSignedUrl, {
+          method: "PUT",
+          body: file,
+          headers: {
+            "Content-Type": "text/csv",
+          },
+        });
+        if (!result.ok) {
+          throw new Error("File upload failed");
+        }
+
+        setFile("");
+        setAlert({ type: "success", text: "File uploaded successfully" });
+      } catch (error) {
+        setAlert({ type: "error", text: "File upload failed" });
+      }
+    }
   };
   return (
     <Box>

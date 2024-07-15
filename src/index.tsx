@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import App from "~/components/App/App";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -7,6 +7,8 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { theme } from "~/theme";
+import { AlertProvider, useAlert } from "./components/AlertContext";
+import axios from "axios";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,6 +21,58 @@ if (import.meta.env.DEV) {
   worker.start({ onUnhandledRequest: "bypass" });
 }
 
+const AppWrapper: React.FC = () => {
+  const setAlert = useAlert();
+
+  useEffect(() => {
+    const requestInterceptor = axios.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem("authorization_token");
+        if (token && config.headers) {
+          config.headers.Authorization = `Basic ${token}`;
+        }
+        return config;
+      },
+      (error) => {
+        console.log("Interceptor caught an error:", (error as Error).message);
+        return Promise.reject(error);
+      }
+    );
+    const responseInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        console.log("Interceptor caught an error:", (error as Error).message);
+        if (axios.isAxiosError(error) && error.response) {
+          const { status } = error.response;
+          setAlert(
+            status === 401
+              ? {
+                  type: "error",
+                  text: "Unauthorized: Please check your credentials.",
+                }
+              : status === 403
+              ? {
+                  type: "error",
+                  text: "Forbidden: You do not have permission to perform this action.",
+                }
+              : { type: "error", text: "Upload failed" }
+          );
+        } else {
+          setAlert({ type: "error", text: "An unexpected error occurred" });
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
+    };
+  }, [setAlert]);
+
+  return <App />;
+};
+
 const container = document.getElementById("app");
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const root = createRoot(container!);
@@ -28,7 +82,9 @@ root.render(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <App />
+          <AlertProvider>
+            <AppWrapper />
+          </AlertProvider>
         </ThemeProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
