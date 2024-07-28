@@ -43,7 +43,7 @@ const Success = () => (
 const steps = ["Review your cart", "Shipping address", "Review your order"];
 
 export default function PageCart() {
-  const { data = [] } = useCart();
+  const { data: cart } = useCart();
   const { mutate: submitOrder } = useSubmitOrder();
   const invalidateCart = useInvalidateCart();
   const [activeStep, setActiveStep] = React.useState<CartStep>(
@@ -51,7 +51,7 @@ export default function PageCart() {
   );
   const [address, setAddress] = useState<Address>(initialAddressValues);
 
-  const isCartEmpty = data.length === 0;
+  const isCartEmpty = !cart || !cart.items || cart.items.length === 0;
 
   const handleNext = () => {
     if (activeStep !== CartStep.ReviewOrder) {
@@ -59,7 +59,7 @@ export default function PageCart() {
       return;
     }
     const values = {
-      items: data.map((i) => ({
+      items: cart?.items.map((i) => ({
         productId: i.product.id,
         count: i.count,
       })),
@@ -90,8 +90,7 @@ export default function PageCart() {
       </Typography>
       <Stepper
         activeStep={activeStep}
-        sx={{ padding: (theme) => theme.spacing(3, 0, 5) }}
-      >
+        sx={{ padding: (theme) => theme.spacing(3, 0, 5) }}>
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
@@ -100,7 +99,7 @@ export default function PageCart() {
       </Stepper>
       {isCartEmpty && <CartIsEmpty />}
       {!isCartEmpty && activeStep === CartStep.ReviewCart && (
-        <ReviewCart items={data} />
+        <ReviewCart items={cart.items} />
       )}
       {activeStep === CartStep.Address && (
         <AddressForm
@@ -109,8 +108,8 @@ export default function PageCart() {
           onSubmit={handleAddressSubmit}
         />
       )}
-      {activeStep === CartStep.ReviewOrder && (
-        <ReviewOrder address={address} items={data} />
+      {activeStep === CartStep.ReviewOrder && cart?.items && (
+        <ReviewOrder address={address} items={cart.items} />
       )}
       {activeStep === CartStep.Success && <Success />}
       {!isCartEmpty &&
